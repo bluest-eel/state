@@ -1,0 +1,24 @@
+db:
+  type: cockroach
+  badger:
+    directory: /tmp/badger
+    value-directory: /tmp/badger
+  cockroach:
+    host: localhost
+    port: 6379
+client:
+  logging:
+    level: warn
+    format-type: line # allowed: line, structured (currently unused)
+    output: stdout # allowed: stdout, stderr, filesystem
+    colored: true
+    report-caller: true
+grpc:
+  host: localhost
+  port: 9999
+logging:
+  level: debug
+  format-type: line # allowed: line, structured (currently unused)
+  output: stdout # allowed: stdout, stderr, filesystem
+  colored: false
+  report-caller: false
