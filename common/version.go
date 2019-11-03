@@ -1,6 +1,10 @@
 package common
 
-import "github.com/bluest-eel/common/util"
+import (
+	"time"
+
+	"github.com/bluest-eel/common/util"
+)
 
 // Versioning data
 var (
@@ -13,9 +17,11 @@ var (
 
 // VersionData stuff for things
 func VersionData() *util.Version {
+	buildTime := time.Now()
 	return &util.Version{
 		Semantic:   version,
 		BuildDate:  buildDate,
+		BuildTime:  &buildTime,
 		GitCommit:  gitCommit,
 		GitBranch:  gitBranch,
 		GitSummary: gitSummary,
