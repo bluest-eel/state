@@ -3,13 +3,16 @@ module github.com/bluest-eel/state
 go 1.12
 
 require (
-	github.com/bluest-eel/common v0.4.1
+	github.com/bluest-eel/common v0.5.0
+	github.com/dgraph-io/badger v1.6.0
 	github.com/geomyidia/zylog v0.1.5
 	github.com/golang/geo v0.0.0-20190916061304-5b978397cfec
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.5.0
+	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli v1.22.1
 	golang.org/x/net v0.0.0-20191101175033-0deb6923b6d9 // indirect
 	golang.org/x/sys v0.0.0-20191029155521-f43be2a4598c // indirect

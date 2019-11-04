@@ -4,7 +4,7 @@ import (
 	"github.com/bluest-eel/common/components"
 	// "github.com/bluest-eel/state/api"
 	"github.com/bluest-eel/state/components/config"
-	// "github.com/bluest-eel/state/components/db"
+	"github.com/bluest-eel/state/components/db"
 	// "google.golang.org/grpc"
 )
 
@@ -22,6 +22,11 @@ type BaseApp struct {
 // BaseCLI ...
 type BaseCLI struct {
 	components.BaseCLI
+}
+
+// BaseDB ...
+type BaseDB struct {
+	DB *db.DB
 }
 
 // // BaseStateClient ...

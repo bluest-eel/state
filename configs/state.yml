@@ -1,8 +1,8 @@
 db:
   type: cockroach
   badger:
-    directory: /tmp/badger
-    value-directory: /tmp/badger
+    directory: ./data/badger
+    value-directory: ./data/badger
   cockroach:
     host: localhost
     port: 6379
