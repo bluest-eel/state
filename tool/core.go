@@ -1,62 +1,63 @@
-// Package tool copied from https://gist.github.com/antoniomo/3371e44cbe2f0cc75a525aac0d188cfb
 package tool
 
 import (
-	"fmt"
+	"os"
 
-	"github.com/golang/geo/s1"
-	"github.com/golang/geo/s2"
+	cfglib "github.com/bluest-eel/common/config"
+	"github.com/bluest-eel/state/common"
+	"github.com/bluest-eel/state/components"
+	"github.com/bluest-eel/state/components/config"
+	log "github.com/sirupsen/logrus"
 )
 
-// https://blog.nobugware.com/post/2016/geo_db_s2_geohash_database/
-// http://s2geometry.io/devguide/cpp/quickstart
-
-const (
-	// The Earth's mean radius in kilometers (according to NASA).
-	earthRadiusKm = 6371.01
-)
-
-// Point ...
-type Point struct {
-	cellID s2.CellID
-	name   string
+// Tool ...
+type Tool struct {
+	components.Base
+	components.BaseApp
+	components.BaseCLI
 }
 
-// NewPoint ...
-func NewPoint(lat, lon float64, name string) Point {
-	return Point{
-		cellID: s2.CellIDFromLatLng(s2.LatLngFromDegrees(lat, lon)),
-		name:   name,
+// NewTool ...
+func NewTool() *Tool {
+	tool := Tool{}
+	tool.AppName = common.AppName
+	tool.AppAbbv = common.AppAbbreviation
+	tool.ProjectPath = common.CallerPaths().DotPath
+	tool.RawArgs = os.Args
+	return &tool
+}
+
+// BootstrapConfiguration ...
+func (t *Tool) BootstrapConfiguration() *config.Config {
+	cfglib.Setup(t.AppAbbv, t.ProjectPath, config.ConfigFile)
+	return config.NewConfig()
+}
+
+// // Close the gRPC connection
+// func (t *Tool) Close() {
+// 	t.APIConn.Close()
+// }
+
+// SetupConfiguration ...
+func (t *Tool) SetupConfiguration() *config.Config {
+	if t.ConfigFile != "" {
+		log.Debug("Updating configuration ...")
+		log.Debugf("Using project path '%s' ...", t.ProjectPath)
+		log.Debugf("Using config file '%s' ...", t.ConfigFile)
+		cfglib.Setup(t.AppAbbv, t.ProjectPath, t.ConfigFile)
+		return config.NewConfig()
 	}
+	log.Debug("No config file passed; using bootstrapped config")
+	return t.Config
 }
 
-// PointsInCellID ...
-func PointsInCellID(s2cap s2.Cap, cov s2.CellID, center s2.LatLng, points []Point) {
-	bmin := uint64(cov.RangeMin())
-	bmax := uint64(cov.RangeMax())
-
-	for _, v := range points {
-		// This simulates an indexed range query on the DB
-		if uint64(v.cellID) < bmin || uint64(v.cellID) > bmax {
-			continue
-		}
-		// Only those in range
-		ll := v.cellID.LatLng()
-		lat := ll.Lat.Degrees()
-		lon := ll.Lng.Degrees()
-		fmt.Println("Nearby Candidate:", lat, lon, v.name)
-		fmt.Println("Calculated distance to Helsinki Center:", AngleToKm(ll.Distance(center)))
-		fmt.Println("False positive?", !s2cap.ContainsPoint(v.cellID.Point()))
-	}
-}
-
-// KmToAngle converts a distance on the Earth's surface to an angle.
-// https://github.com/golang/geo/blob/23949e136d58aeb8aa39844a312b68d90c4eb8aa/s2/s2_test.go#L38-L43
-func KmToAngle(km float64) s1.Angle {
-	return s1.Angle(km / earthRadiusKm)
-}
-
-// AngleToKm ...
-func AngleToKm(angle s1.Angle) float64 {
-	return earthRadiusKm * float64(angle)
+// SetupGRPCConnection ...
+func (t *Tool) SetupGRPCConnection() {
+	// connectionOpts := c.Config.GRPCConnectionString()
+	// conn, err := grpc.Dial(connectionOpts, grpc.WithInsecure())
+	// if err != nil {
+	// 	log.Fatalf("did not connect to gRPC server: %v", err)
+	// }
+	// c.KVConn = conn
+	// c.KVClient = api.NewKVServiceClient(conn)
 }

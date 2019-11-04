@@ -13,6 +13,13 @@ export PATH := $(PATH):$(DEFAULT_GOBIN)
 
 GOLANGCI_LINT = $(DEFAULT_GOBIN)/golangci-lint
 RICH_GO = $(DEFAULT_GOBIN)/richgo
+GODA = $(DEFAULT_GOBIN)/goda
+
+DVCS_HOST = github.com
+ORG = bluest-eel
+DOCKER_ORG = bluesteelabm
+PROJ = state
+FQ_PROJ = $(DVCS_HOST)/$(ORG)/$(PROJ)
 
 LD_VERSION = -X $(FQ_PROJ)/common.version=$(VERSION)
 LD_BUILDDATE = -X $(FQ_PROJ)/common.buildDate=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -152,10 +159,10 @@ clean-docker:
 
 tag:
 	@echo "Tags:"
-	@git tag
+	@git tag|tail -5
 	@git tag "v$(VERSION)"
 	@echo "New tag list:"
-	@git tag
+	@git tag|tail -6
 
 #############################################################################
 ###   Misc   ################################################################
@@ -163,10 +170,31 @@ tag:
 
 clean-cache:
 	@echo '>> Purging Go mod cahce ...'
-	@$(GO) clean -cache
+	# @$(GO) clean -cache
 	@$(GO) clean -modcache
 
 show-targets:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | \
 	awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | \
 	sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
+
+check-modules:
+	@echo '>> Checking modules ...'
+	@GO111MODULE=on $(GO) mod tidy
+	@#@GO111MODULE=on $(GO) mod verify
+
+$(GODA):
+	@echo ">> Couldn't find $(GODA); installing ..."
+	@GOPATH=$(DEFAULT_GOPATH) \
+	GOBIN=$(DEFAULT_GOBIN) \
+	GO111MODULE=on \
+	$(GO) get -u github.com/loov/goda
+
+deps-tree: $(GODA)
+	@GO111MODULE=on $(GODA) tree ./...
+
+deps-graph: $(GODA)
+	@GO111MODULE=on $(GODA) graph ./... | dot -Tsvg -o graph.svg
+
+show-ldflags:
+	@echo $(LDFLAGS)
