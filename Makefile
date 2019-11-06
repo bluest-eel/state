@@ -97,6 +97,7 @@ build-tool: | bin/$(TOOL)
 build: build-tool
 build-linux:
 	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(MAKE) build
+rebuild: clean build
 
 clean:
 	@echo '>> Removing project binaries ...'
@@ -113,11 +114,11 @@ up:
 	@VERSION=$(VERSION) RELAYD_VERSION=$(WS_RELAY_VERSION) \
 	docker-compose -f ./docker/dev/compose.yml up
 
-rebuild:
+docker-rebuild:
 	@VERSION=$(VERSION) RELAYD_VERSION=$(WS_RELAY_VERSION) \
 	docker-compose -f ./docker/dev/compose.yml build
 
-rebuild-up: rebuild up
+docker-rebuild-up: docker-rebuild up
 
 down:
 	@VERSION=$(VERSION) RELAYD_VERSION=$(WS_RELAY_VERSION) \
