@@ -32,7 +32,7 @@ LDFLAGS = -w -s $(LD_VERSION) $(LD_BUILDDATE) $(LD_GITBRANCH) $(LD_GITSUMMARY) $
 default: all
 
 all-pre-test: clean lint
-all-post-test: build
+all-post-test: build check-modules
 all: all-pre-test test all-post-test
 all-cicd: all-pre-test test-nocolor all-post-test
 
@@ -88,9 +88,9 @@ test-nocolor:
 bin:
 	@mkdir ./bin
 
-TOOL = tool
+TOOL = state
 bin/$(TOOL): bin
-	@echo '>> Building tool binary'
+	@echo '>> Building state binary'
 	@$(GO) build -ldflags "$(LDFLAGS)" -o bin/$(TOOL) ./cmd/$(TOOL)
 
 build-tool: | bin/$(TOOL)

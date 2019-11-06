@@ -8,7 +8,7 @@ db:
     port: 6379
 client:
   logging:
-    level: warn
+    level: info
     format-type: line # allowed: line, structured (currently unused)
     output: stdout # allowed: stdout, stderr, filesystem
     colored: true

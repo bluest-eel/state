@@ -43,10 +43,10 @@ func PointsInCellID(s2cap s2.Cap, cov s2.CellID, center s2.LatLng, points []Poin
 		ll := v.cellID.LatLng()
 		lat := ll.Lat.Degrees()
 		lon := ll.Lng.Degrees()
-		log.Debugf("Nearby Candidate: %f (lat) %f (lon) %s", lat, lon, v.name)
-		log.Debugf("Calculated distance to Helsinki Center: %f km",
+		log.Infof("Nearby Candidate: %f (lat) %f (lon) %s", lat, lon, v.name)
+		log.Infof("Calculated distance to Helsinki Center: %f km",
 			AngleToKm(ll.Distance(center)))
-		log.Debug("False positive? ", !s2cap.ContainsPoint(v.cellID.Point()))
+		log.Info("False positive? ", !s2cap.ContainsPoint(v.cellID.Point()))
 	}
 }
 
@@ -77,10 +77,10 @@ var (
 	}
 )
 
-// RunTool https://godoc.org/github.com/golang/geo/s2#Cap
-func (t *Tool) RunTool() {
+// Run https://godoc.org/github.com/golang/geo/s2#Cap
+func Run() {
 	c := s2.CellIDFromLatLng(LLH)
-	log.Debugf("Center cell id: %#v", c)
+	log.Infof("Center cell id: %#v", c)
 
 	s2cap := s2.CapFromCenterAngle(c.Point(), KmToAngle(12.5))
 	// http://s2geometry.io/resources/s2cell_statistics.html
@@ -92,7 +92,7 @@ func (t *Tool) RunTool() {
 	covering := rc.Covering(s2.Region(s2cap))
 
 	for i, cov := range covering {
-		log.Debugf("Covering Cell %d ID: %d Level: %d", i, uint64(cov),
+		log.Infof("Covering Cell %d ID: %d Level: %d", i, uint64(cov),
 			cov.Level())
 		PointsInCellID(s2cap, cov, LLH, Points)
 	}
