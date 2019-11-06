@@ -7,9 +7,12 @@ import (
 	"github.com/bluest-eel/state/tool"
 )
 
+// XXX Note that any of this which ends up being useful will be moved into the
+//     bluest-eel/cli repo; the `tool` code here is just an experiment to get
+//     familiar with the s2 library.
 func main() {
 	// Create the tool object and assign components to it
-	t := new(tool.Tool)
+	t := tool.NewTool()
 	// Bootstrap configuration and logging with defaults; this is to assist with
 	// any debugging, e.g., logging output, etc.
 	t.Config = t.BootstrapConfiguration()
