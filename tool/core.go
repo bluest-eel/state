@@ -7,6 +7,7 @@ import (
 	"github.com/bluest-eel/state/common"
 	"github.com/bluest-eel/state/components"
 	"github.com/bluest-eel/state/components/config"
+	"github.com/bluest-eel/state/components/db"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -14,6 +15,7 @@ import (
 type Tool struct {
 	components.Base
 	components.BaseApp
+	components.BaseDB
 	components.BaseCLI
 }
 
@@ -49,6 +51,16 @@ func (t *Tool) SetupConfiguration() *config.Config {
 	}
 	log.Debug("No config file passed; using bootstrapped config")
 	return t.Config
+}
+
+// SetupDBConnection ...
+func (t *Tool) SetupDBConnection() {
+	log.Debug("Setting up database connection ...")
+	db, err := db.Open(t.Config)
+	if err != nil {
+		log.Fatal(err)
+	}
+	t.DB = &db
 }
 
 // SetupGRPCConnection ...

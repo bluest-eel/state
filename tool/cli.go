@@ -98,8 +98,7 @@ func (t *Tool) SetBefore() {
 		log.Debugf("Updated client logging config: %#v", t.Config.Client.Logging)
 		t.Logger = logging.LoadClient(t.Config)
 		log.Debug("Post-reconfiguration setup ...")
-		// Perform client setup and then issue the parsed command
-		// t.SetupConnection()
+		t.SetupDBConnection()
 		return nil
 	}
 }
