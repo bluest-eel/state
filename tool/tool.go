@@ -2,10 +2,9 @@
 package tool
 
 import (
-	"fmt"
-
 	"github.com/golang/geo/s1"
 	"github.com/golang/geo/s2"
+	log "github.com/sirupsen/logrus"
 )
 
 // https://blog.nobugware.com/post/2016/geo_db_s2_geohash_database/
@@ -44,9 +43,10 @@ func PointsInCellID(s2cap s2.Cap, cov s2.CellID, center s2.LatLng, points []Poin
 		ll := v.cellID.LatLng()
 		lat := ll.Lat.Degrees()
 		lon := ll.Lng.Degrees()
-		fmt.Println("Nearby Candidate:", lat, lon, v.name)
-		fmt.Println("Calculated distance to Helsinki Center:", AngleToKm(ll.Distance(center)))
-		fmt.Println("False positive?", !s2cap.ContainsPoint(v.cellID.Point()))
+		log.Debugf("Nearby Candidate: %f (lat) %f (lon) %s", lat, lon, v.name)
+		log.Debugf("Calculated distance to Helsinki Center: %f km",
+			AngleToKm(ll.Distance(center)))
+		log.Debug("False positive? ", !s2cap.ContainsPoint(v.cellID.Point()))
 	}
 }
 
@@ -66,10 +66,10 @@ var (
 	LLH = s2.LatLngFromDegrees(60.1699, 24.9384) // Helsinki Center
 	// https://www.movable-type.co.uk/scripts/latlong.html
 	Points = []Point{
-		NewPoint(60.1699, 24.9384, "Helsinki Center"),
-		NewPoint(60.2934, 25.0378, "Vantaa Center (14.79km)"),
-		NewPoint(60.2055, 24.6559, "Espoo Center (16.11km)"),
-		NewPoint(60.1699, 24.9380, "Person in Helsinki (22m)"),
+		NewPoint(60.1699, 24.9384, "Helsinki Center (0 km)"),
+		NewPoint(60.2934, 25.0378, "Vantaa Center (14.79 km)"),
+		NewPoint(60.2055, 24.6559, "Espoo Center (16.11 km)"),
+		NewPoint(60.1699, 24.9380, "Person in Helsinki (22 m)"),
 		NewPoint(50.0, 150.0, "far"),
 		NewPoint(150.0, 50.0, "far"),
 		NewPoint(150.0, 150.0, "far"),
@@ -80,7 +80,7 @@ var (
 // RunTool https://godoc.org/github.com/golang/geo/s2#Cap
 func (t *Tool) RunTool() {
 	c := s2.CellIDFromLatLng(LLH)
-	fmt.Println(c)
+	log.Debugf("Center cell id: %#v", c)
 
 	s2cap := s2.CapFromCenterAngle(c.Point(), KmToAngle(12.5))
 	// http://s2geometry.io/resources/s2cell_statistics.html
@@ -92,7 +92,8 @@ func (t *Tool) RunTool() {
 	covering := rc.Covering(s2.Region(s2cap))
 
 	for i, cov := range covering {
-		fmt.Printf("Covering Cell %d ID: %d Level: %d\n", i, uint64(cov), cov.Level())
+		log.Debugf("Covering Cell %d ID: %d Level: %d", i, uint64(cov),
+			cov.Level())
 		PointsInCellID(s2cap, cov, LLH, Points)
 	}
 }
