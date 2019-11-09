@@ -1,5 +1,6 @@
 VERSION = $(shell cat VERSION)
 GO ?= go
+GOMOD ?= on
 GOFMT ?= $(GO)fmt
 DOCKER_ORG = bluesteelabm
 
@@ -48,19 +49,20 @@ show-version:
 
 deps:
 	@echo '>> Downloading deps ...'
-	@$(GO) get -v -d ./...
+	@GO111MODULE=$(GOMOD) $(GO) get -v -u ./...
 
 $(GOLANGCI_LINT):
 	@echo ">> Couldn't find $(GOLANGCI_LINT); installing ..."
-	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | \
-	sh -s -- -b $(DEFAULT_GOBIN) v1.15.0
+	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| \
+	sh -s -- -b $(DEFAULT_GOBIN) v1.21.0
 
 show-linter:
 	@echo $(GOLANGCI_LINT)
 
 lint: $(GOLANGCI_LINT)
 	@echo '>> Linting source code'
-	@GL_DEBUG=linters_output GOPACKAGESPRINTGOLISTERRORS=1 $(GOLANGCI_LINT) \
+	@GL_DEBUG=linters_output GOPACKAGESPRINTGOLISTERRORS=1 \
+	$(GOLANGCI_LINT) \
 	--enable=golint \
 	--enable=gocritic \
 	--enable=misspell \
@@ -74,16 +76,16 @@ $(RICH_GO):
 	@echo ">> Couldn't find $(RICH_GO); installing ..."
 	@GOPATH=$(DEFAULT_GOPATH) \
 	GOBIN=$(DEFAULT_GOBIN) \
-	GO111MODULE=on \
+	GO111MODULE=$(GOMOD) \
 	$(GO) get -u github.com/kyoh86/richgo
 
 test: $(RICH_GO)
 	@echo '>> Running all tests'
-	@$(RICH_GO) test ./... -v
+	@GO111MODULE=$(GOMOD) $(RICH_GO) test ./... -v
 
 test-nocolor:
 	@echo '>> Running all tests'
-	@$(GO) test ./... -v
+	@GO111MODULE=$(GOMOD) @$(GO) test ./... -v
 
 bin:
 	@mkdir ./bin
@@ -91,7 +93,7 @@ bin:
 TOOL = state
 bin/$(TOOL): bin
 	@echo '>> Building state binary'
-	@$(GO) build -ldflags "$(LDFLAGS)" -o bin/$(TOOL) ./cmd/$(TOOL)
+	@GO111MODULE=$(GOMOD) $(GO) build -ldflags "$(LDFLAGS)" -o bin/$(TOOL) ./cmd/$(TOOL)
 
 build-tool: | bin/$(TOOL)
 build: build-tool
@@ -171,8 +173,8 @@ tag:
 
 clean-cache:
 	@echo '>> Purging Go mod cahce ...'
-	# @$(GO) clean -cache
-	@$(GO) clean -modcache
+	@GO111MODULE=$(GOMOD) $(GO) clean -cache
+	@GO111MODULE=$(GOMOD) $(GO) clean -modcache
 
 show-targets:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | \
@@ -188,14 +190,14 @@ $(GODA):
 	@echo ">> Couldn't find $(GODA); installing ..."
 	@GOPATH=$(DEFAULT_GOPATH) \
 	GOBIN=$(DEFAULT_GOBIN) \
-	GO111MODULE=on \
+	GO111MODULE=$(GOMOD)  \
 	$(GO) get -u github.com/loov/goda
 
 deps-tree: $(GODA)
-	@GO111MODULE=on $(GODA) tree ./...
+	@GO111MODULE=$(GOMOD) $(GODA) tree ./...
 
 deps-graph: $(GODA)
-	@GO111MODULE=on $(GODA) graph ./... | dot -Tsvg -o graph.svg
+	@GO111MODULE=$(GOMOD) $(GODA) graph ./... | dot -Tsvg -o graph.svg
 
 show-ldflags:
 	@echo $(LDFLAGS)
