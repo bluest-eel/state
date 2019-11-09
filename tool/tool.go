@@ -2,6 +2,7 @@
 package tool
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 
@@ -13,10 +14,44 @@ import (
 // https://blog.nobugware.com/post/2016/geo_db_s2_geohash_database/
 // http://s2geometry.io/devguide/cpp/quickstart
 
+// Tool constants
 const (
-	// The Earth's mean radius in kilometers (according to NASA).
-	earthRadiusKm  = 6371.01
-	pointDelimiter = "::"
+	EarthRadiusKm   = 6371.01 // Earth's mean radius, km (according to NASA).
+	Helsinki        = "helsinki"
+	Oxford          = "oxford"
+	PointDelimiter  = "::"
+	PointsDelimiter = "|"
+	Tolkien         = "tolkien"
+)
+
+// Example Points
+var (
+	HelsinkiExamplePoints = []Point{
+		NewPoint(60.2934, 25.0378, "Vantaa Center"),
+		NewPoint(60.2055, 24.6559, "Espoo Center"),
+		NewPoint(60.1699, 24.9380, "Person in Helsinki"),
+		NewPoint(50.0, 150.0, "far"),
+		NewPoint(150.0, 50.0, "far"),
+		NewPoint(150.0, 150.0, "far"),
+		NewPoint(50.0, -50.0, "far"),
+	}
+	OxfordExamplePoints = []Point{
+		NewPoint(51.751944, -1.257778, "Oxford"),
+		NewPoint(51.7572, -1.2603, "The Eagle and Child"),
+		NewPoint(51.507222, -0.1275, "London"),
+		NewPoint(51.48, 0, "Greenwich"),
+		NewPoint(50.0, 150.0, "far"),
+		NewPoint(150.0, 50.0, "far"),
+		NewPoint(150.0, 150.0, "far"),
+		NewPoint(50.0, -50.0, "far"),
+	}
+	// Note that the following are also used for tests
+	OxfordPubs = "51.7572::-1.2603::The Eagle and Child|" +
+		"51.7550609::-1.2617064::Morse Bar|" +
+		"51.755::-1.2544::The King's Arms|" +
+		"51.7546135::-1.2577909::The White Horse|" +
+		"51.7547::-1.253::The Turf Tavern"
+	TolkiensHouse = "51.770903::-1.2626219::Tolkien's House"
 )
 
 // Point ...
@@ -57,38 +92,14 @@ func PointsInCellID(s2cap s2.Cap, cov s2.CellID, center Point, points []Point) {
 	}
 }
 
-// KmToAngle converts a distance on the Earth's surface to an angle.
-// https://github.com/golang/geo/blob/23949e136d58aeb8aa39844a312b68d90c4eb8aa/s2/s2_test.go#L38-L43
-func KmToAngle(km float64) s1.Angle {
-	return s1.Angle(km / earthRadiusKm)
-}
-
-// AngleToKm ...
-func AngleToKm(angle s1.Angle) float64 {
-	return earthRadiusKm * float64(angle)
-}
-
-// Vars 'n' stuff
-var (
-	// https://www.movable-type.co.uk/scripts/latlong.html
-	Points = []Point{
-		NewPoint(60.2934, 25.0378, "Vantaa Center"),
-		NewPoint(60.2055, 24.6559, "Espoo Center"),
-		NewPoint(60.1699, 24.9380, "Person in Helsinki"),
-		NewPoint(50.0, 150.0, "far"),
-		NewPoint(150.0, 50.0, "far"),
-		NewPoint(150.0, 150.0, "far"),
-		NewPoint(50.0, -50.0, "far"),
-	}
-)
-
 // Run https://godoc.org/github.com/golang/geo/s2#Cap
-func Run(center string) {
-	c := ParsePoint(center)
-	log.Infof("Center cell id: %#v", c)
-	Points = append(Points, c)
+func Run(c string, p string) {
+	center := ParsePoint(c)
+	log.Infof("Center cell id: %#v", center)
+	points := ParsePoints(p)
+	points = append(points, center)
 
-	s2cap := s2.CapFromCenterAngle(c.CellID.Point(), KmToAngle(12.5))
+	s2cap := s2.CapFromCenterAngle(center.CellID.Point(), KmToAngle(12.5))
 	// http://s2geometry.io/resources/s2cell_statistics.html
 	// Level 12 are about 3 to 6.4km^2 cells
 	// Level 20 are about 46.41 to 97.3 meter cells
@@ -100,30 +111,76 @@ func Run(center string) {
 	for i, cov := range covering {
 		log.Infof("Covering Cell %d ID: %d Level: %d", i, uint64(cov),
 			cov.Level())
-		PointsInCellID(s2cap, cov, c, Points)
+		PointsInCellID(s2cap, cov, center, points)
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////
+///   Utility Functions   ///////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+// KmToAngle converts a distance on the Earth's surface to an angle.
+// https://github.com/golang/geo/blob/23949e136d58aeb8aa39844a312b68d90c4eb8aa/s2/s2_test.go#L38-L43
+func KmToAngle(km float64) s1.Angle {
+	return s1.Angle(km / EarthRadiusKm)
+}
+
+// AngleToKm ...
+func AngleToKm(angle s1.Angle) float64 {
+	return EarthRadiusKm * float64(angle)
+}
+
+// SplitterOpts ...
+type SplitterOpts struct {
+	Delimiter string
+	MinVars   int
+	MaxVars   int
+}
+
+// PointSplitterOpts ...
+var PointSplitterOpts = &SplitterOpts{
+	MinVars:   2,
+	MaxVars:   3,
+	Delimiter: PointDelimiter,
+}
+
+// Splitter ...
+func Splitter(s string, opts *SplitterOpts, vars ...*string) error {
+	parts := strings.Split(s, opts.Delimiter)
+	switch {
+	case len(vars) < opts.MinVars:
+		return errors.New("Too few variable pointers were passed")
+	case len(vars) > opts.MaxVars:
+		return errors.New("Too many variable pointers were passed")
+	case len(parts) > opts.MaxVars:
+		return errors.New("Too many delimited items")
+	default:
+		for i, str := range parts {
+			*vars[i] = str
+		}
+	}
+	return nil
+}
+
+/////////////////////////////////////////////////////////////////////////////
+///   CLI Helper Functions   ////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
 // ParsePoint ...
 func ParsePoint(delimited string) Point {
-	log.Debugf("Pasring '%s' ...", delimited)
-	args := strings.Split(delimited, pointDelimiter)
-	var err error
+	log.Debugf("Pasring point '%s' ...", delimited)
 	var latArg, lonArg, name string
-	var lat, lon float64
-	switch {
-	case len(args) < 2:
-		log.Errorf("Bad delimited point: %s", delimited)
-		log.Fatal("At a minium, latitude and longitude must be provided")
-	case len(args) == 2:
-		latArg = args[0]
-		lonArg = args[1]
-		name = ""
-	default:
-		latArg = args[0]
-		lonArg = args[1]
-		name = args[2]
+	err := Splitter(delimited, PointSplitterOpts, &latArg, &lonArg, &name)
+	if err != nil {
+		log.Fatal(err)
 	}
+	if latArg == Tolkien {
+		err = Splitter(TolkiensHouse, PointSplitterOpts, &latArg, &lonArg, &name)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	var lat, lon float64
 	lat, err = strconv.ParseFloat(latArg, 64)
 	if err != nil {
 		log.Fatal(err)
@@ -133,4 +190,22 @@ func ParsePoint(delimited string) Point {
 		log.Fatal(err)
 	}
 	return NewPoint(lat, lon, name)
+}
+
+// ParsePoints ...
+func ParsePoints(delimited string) []Point {
+	log.Debugf("Pasring points '%s' ...", delimited)
+	args := strings.Split(delimited, PointsDelimiter)
+	switch {
+	case args[0] == Helsinki:
+		return HelsinkiExamplePoints
+	case args[0] == Oxford:
+		return OxfordExamplePoints
+	default:
+		points := make([]Point, len(args))
+		for i, p := range args {
+			points[i] = ParsePoint(p)
+		}
+		return points
+	}
 }
