@@ -27,23 +27,24 @@ const (
 
 // Example Points
 var (
-	HelsinkiExamplePoints = []Point{
-		NewPoint(60.2934, 25.0378, "Vantaa Center"),
-		NewPoint(60.2055, 24.6559, "Espoo Center"),
-		NewPoint(60.1699, 24.9380, "Person in Helsinki"),
-		NewPoint(50.0, 150.0, "far"),
-		NewPoint(150.0, 50.0, "far"),
-		NewPoint(150.0, 150.0, "far"),
-		NewPoint(50.0, -50.0, "far"),
-	}
-	OxfordExamplePoints = []Point{
-		NewPoint(51.751944, -1.257778, "Oxford"),
-		NewPoint(51.7572, -1.2603, "The Eagle and Child"),
-		NewPoint(51.507222, -0.1275, "London"),
-		NewPoint(51.48, 0, "Greenwich"),
-		NewPoint(52.205278, 0.119167, "Cambridge"),
-	}
-	// Note that the following are also used for tests
+	HelsinkiCenter        = "60.1699::24.9384::Helsinki Center"
+	HelsinkiExamplePoints = "60.2934::25.0378::Vantaa Center|" +
+		"60.2055::24.6559::Espoo Center|" +
+		"60.1699::24.9380::Person in Helsinki|" +
+		// Far points
+		"50.0::150.0::Seah of Okhotsk|" +
+		"50.0::-150.0::North Pacific Ocean|" +
+		"50.0::50.0::Western Kazakhstan|" +
+		"50.0::-50.0::Labrador Sea"
+	OxfordExamplePoints = "51.751944::-1.257778::Oxford|" +
+		"51.7572::-1.2603::The Eagle and Child|" +
+		"51.507222::-0.1275::London|" +
+		"51.48::0::Greenwich|" +
+		"52.205278::0.119167::Cambridge|" +
+		// Far points
+		"42.116667::-71.865278::Oxford, Massachusetts|" +
+		"-43.312778::172.190556::Oxford, New Zealand"
+	// Pints points
 	OxfordPubExamplePoints = "51.7572::-1.2603::The Eagle and Child|" +
 		"51.7550609::-1.2617064::Morse Bar|" +
 		"51.755::-1.2544::The King's Arms|" +
@@ -145,11 +146,11 @@ func ParsePoint(delimited string) Point {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if latArg == Tolkien {
-		err = Splitter(TolkiensHouse, PointSplitterOpts, &latArg, &lonArg, &name)
-		if err != nil {
-			log.Fatal(err)
-		}
+	switch {
+	case latArg == Helsinki:
+		return ParsePoint(HelsinkiCenter)
+	case latArg == Tolkien:
+		return ParsePoint(TolkiensHouse)
 	}
 	lat, lon := ConvertLatLon(latArg, lonArg)
 	return NewPoint(lat, lon, name)
@@ -159,11 +160,14 @@ func ParsePoint(delimited string) Point {
 func ParsePoints(delimited string) []Point {
 	log.Debugf("Pasring points '%s' ...", delimited)
 	args := strings.Split(delimited, PointsDelimiter)
+	alias := args[0]
 	switch {
-	case args[0] == Helsinki:
-		return HelsinkiExamplePoints
-	case args[0] == Oxford:
-		return OxfordExamplePoints
+	case alias == Helsinki:
+		return ParsePoints(HelsinkiExamplePoints)
+	case alias == Oxford:
+		return ParsePoints(OxfordExamplePoints)
+	case alias == OxfordPubs:
+		return ParsePoints(OxfordPubExamplePoints)
 	default:
 		points := make([]Point, len(args))
 		for i, p := range args {
