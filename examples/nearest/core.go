@@ -1,5 +1,5 @@
 // Package tool copied from https://gist.github.com/antoniomo/3371e44cbe2f0cc75a525aac0d188cfb
-package tool
+package nearest
 
 import (
 	"errors"

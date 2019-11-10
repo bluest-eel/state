@@ -1,4 +1,4 @@
-package tool_test
+package nearest_test
 
 import (
 	"sort"
@@ -6,21 +6,21 @@ import (
 	"testing"
 
 	"github.com/bluest-eel/state/components"
-	"github.com/bluest-eel/state/tool"
+	"github.com/bluest-eel/state/examples/nearest"
 	"github.com/golang/geo/s1"
 	"github.com/stretchr/testify/suite"
 )
 
-type toolTestSuite struct {
+type nearestTestSuite struct {
 	components.TestBase
 }
 
-func TestToolTestSuite(t *testing.T) {
-	suite.Run(t, &toolTestSuite{})
+func TestNearestTestSuite(t *testing.T) {
+	suite.Run(t, &nearestTestSuite{})
 }
 
-func (suite *toolTestSuite) TestParsePoint() {
-	result := tool.ParsePoint("51.7546135::-1.2577909::The White Horse")
+func (suite *nearestTestSuite) TestParsePoint() {
+	result := nearest.ParsePoint("51.7546135::-1.2577909::The White Horse")
 	suite.Equal("4876c6af5db009dd", result.CellID.ToToken())
 	suite.Equal(s1.Angle(0.9032884086721062), result.LatLon.Lat)
 	suite.Equal(s1.Angle(-0.021952592506622747), result.LatLon.Lng)
@@ -28,8 +28,8 @@ func (suite *toolTestSuite) TestParsePoint() {
 	suite.Equal(-1.2577909, result.LatLon.Lng.Degrees())
 }
 
-func (suite *toolTestSuite) TestParsePoints() {
-	result := tool.ParsePoints(tool.OxfordPubExamplePoints)
+func (suite *nearestTestSuite) TestParsePoints() {
+	result := nearest.ParsePoints(nearest.OxfordPubExamplePoints)
 	names := make([]string, len(result))
 	for i, p := range result {
 		names[i] = p.Name
@@ -40,15 +40,15 @@ func (suite *toolTestSuite) TestParsePoints() {
 		strings.Join(names, ","))
 }
 
-func (suite *toolTestSuite) TestSplitter1Arg() {
+func (suite *nearestTestSuite) TestSplitter1Arg() {
 	var latArg, lonArg, name string
-	err := tool.Splitter("51.770903", tool.PointSplitterOpts,
+	err := nearest.Splitter("51.770903", nearest.PointSplitterOpts,
 		&latArg, &lonArg, &name)
 	suite.NoError(err)
 	suite.Equal("51.770903", latArg)
 	suite.Equal("", lonArg)
 	suite.Equal("", name)
-	err = tool.Splitter("51.770903::", tool.PointSplitterOpts,
+	err = nearest.Splitter("51.770903::", nearest.PointSplitterOpts,
 		&latArg, &lonArg, &name)
 	suite.NoError(err)
 	suite.Equal("51.770903", latArg)
@@ -56,9 +56,9 @@ func (suite *toolTestSuite) TestSplitter1Arg() {
 	suite.Equal("", name)
 }
 
-func (suite *toolTestSuite) TestSplitter2Args() {
+func (suite *nearestTestSuite) TestSplitter2Args() {
 	var latArg, lonArg, name string
-	err := tool.Splitter("51.770903::-1.2626219", tool.PointSplitterOpts,
+	err := nearest.Splitter("51.770903::-1.2626219", nearest.PointSplitterOpts,
 		&latArg, &lonArg, &name)
 	suite.NoError(err)
 	suite.Equal("51.770903", latArg)
@@ -66,9 +66,9 @@ func (suite *toolTestSuite) TestSplitter2Args() {
 	suite.Equal("", name)
 }
 
-func (suite *toolTestSuite) TestSplitter3Args() {
+func (suite *nearestTestSuite) TestSplitter3Args() {
 	var latArg, lonArg, name string
-	err := tool.Splitter(tool.TolkiensHouse, tool.PointSplitterOpts,
+	err := nearest.Splitter(nearest.TolkiensHouse, nearest.PointSplitterOpts,
 		&latArg, &lonArg, &name)
 	suite.NoError(err)
 	suite.Equal("51.770903", latArg)
@@ -76,13 +76,13 @@ func (suite *toolTestSuite) TestSplitter3Args() {
 	suite.Equal("Tolkien's House", name)
 }
 
-func (suite *toolTestSuite) TestSplitterMoreThan3Args() {
+func (suite *nearestTestSuite) TestSplitterMoreThan3Args() {
 	var latArg, lonArg, name string
-	err := tool.Splitter(tool.TolkiensHouse+"::extraneous", tool.PointSplitterOpts,
+	err := nearest.Splitter(nearest.TolkiensHouse+"::extraneous", nearest.PointSplitterOpts,
 		&latArg, &lonArg, &name)
 	suite.Error(err)
 	suite.Equal("Too many delimited items", err.Error())
-	err = tool.Splitter(tool.TolkiensHouse+"::extra::neo::us", tool.PointSplitterOpts,
+	err = nearest.Splitter(nearest.TolkiensHouse+"::extra::neo::us", nearest.PointSplitterOpts,
 		&latArg, &lonArg, &name)
 	suite.Error(err)
 	suite.Equal("Too many delimited items", err.Error())
