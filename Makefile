@@ -33,7 +33,7 @@ LDFLAGS = -w -s $(LD_VERSION) $(LD_BUILDDATE) $(LD_GITBRANCH) $(LD_GITSUMMARY) $
 default: all
 
 all-pre-test: clean lint
-all-post-test: build check-modules
+all-post-test: check-modules
 all: all-pre-test test all-post-test
 all-cicd: all-pre-test test-nocolor all-post-test
 

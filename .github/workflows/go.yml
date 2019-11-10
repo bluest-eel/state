@@ -29,6 +29,3 @@ jobs:
 
     - name: Test
       run: make test-nocolor
-
-    - name: Build
-      run: make build
