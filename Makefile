@@ -85,7 +85,7 @@ test: $(RICH_GO)
 
 test-nocolor:
 	@echo '>> Running all tests'
-	@GO111MODULE=$(GOMOD) @$(GO) test ./... -v
+	@GO111MODULE=$(GOMOD) $(GO) test ./... -v
 
 bin:
 	@mkdir ./bin
