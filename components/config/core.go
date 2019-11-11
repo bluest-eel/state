@@ -47,6 +47,11 @@ type GRPCDConfig struct {
 	Port int
 }
 
+// MarshallerConfig ...
+type MarshallerConfig struct {
+	Type string
+}
+
 // ClientConfig ...
 type ClientConfig struct {
 	Logging *logger.ZyLogOptions
@@ -54,10 +59,11 @@ type ClientConfig struct {
 
 // Config ...
 type Config struct {
-	Client  *ClientConfig
-	DB      *DBConfig
-	GRPCD   *GRPCDConfig
-	Logging *logger.ZyLogOptions
+	Client     *ClientConfig
+	DB         *DBConfig
+	GRPCD      *GRPCDConfig
+	Logging    *logger.ZyLogOptions
+	Marshaller *MarshallerConfig
 }
 
 // NewConfig is a constructor that creates the full coniguration data structure
@@ -103,6 +109,9 @@ func NewConfig() *Config {
 				Output:       cfg.GetString("client.logging.output"),
 				ReportCaller: cfg.GetBool("client.logging.report-caller"),
 			},
+		},
+		Marshaller: &MarshallerConfig{
+			Type: cfg.GetString("marshaller.type"),
 		},
 	}
 }

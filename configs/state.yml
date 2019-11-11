@@ -22,3 +22,5 @@ logging:
   output: stdout # allowed: stdout, stderr, filesystem
   colored: false
   report-caller: false
+marshaller:
+  type: gotiny # see marshaller component for possible types
