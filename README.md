@@ -1,14 +1,14 @@
 # state
 
-[![Project Logo][logo]][logo-large]
-
-*Distributed world and agent state for Bluest Eel models*
-
 [![Build Status][build-badge]][build]
 ![Project Status][project-status]
 [![Go Report Card][report-card-badge]][report-card]
 <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Coverage-39%25-brightgreen.svg?longCache=true&style=flat)</a>
 [![Tagged Version][tag-badge]][tag]
+
+[![Project Logo][logo]][logo-large]
+
+*Distributed world and agent state for Bluest Eel models*
 
 ## Getting Started
 
