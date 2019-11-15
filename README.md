@@ -5,8 +5,9 @@
 *Distributed world and agent state for Bluest Eel models*
 
 [![Build Status][build-badge]][build]
-[![Go Report Card][report-card-badge]][report-card] 
 ![Project Status][project-status]
+[![Go Report Card][report-card-badge]][report-card]
+<a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Coverage-39%25-brightgreen.svg?longCache=true&style=flat)</a>
 [![Tagged Version][tag-badge]][tag]
 
 ## Getting Started
@@ -47,6 +48,6 @@ Time: 3.2932ms
 [build]: https://github.com/bluest-eel/state/actions
 [report-card-badge]: https://goreportcard.com/badge/bluest-eel/state
 [report-card]: https://goreportcard.com/report/bluest-eel/state
-[project-status]: https://img.shields.io/badge/status-planning-violet.svg
+[project-status]: https://img.shields.io/badge/project%20status-planning-violet.svg
 [tag-badge]: https://img.shields.io/github/tag/bluest-eel/state.svg
 [tag]: https://github.com/bluest-eel/state/tags

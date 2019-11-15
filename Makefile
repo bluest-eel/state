@@ -15,6 +15,7 @@ export PATH := $(PATH):$(DEFAULT_GOBIN)
 GOLANGCI_LINT = $(DEFAULT_GOBIN)/golangci-lint
 RICH_GO = $(DEFAULT_GOBIN)/richgo
 GODA = $(DEFAULT_GOBIN)/goda
+GOBADGE = $(DEFAULT_GOBIN)/gopherbadger
 
 DVCS_HOST = github.com
 ORG = bluest-eel
@@ -77,7 +78,7 @@ $(RICH_GO):
 	@GOPATH=$(DEFAULT_GOPATH) \
 	GOBIN=$(DEFAULT_GOBIN) \
 	GO111MODULE=$(GOMOD) \
-	$(GO) get -u github.com/kyoh86/richgo
+	$(GO) get github.com/kyoh86/richgo
 
 test: $(RICH_GO)
 	@echo '>> Running all tests'
@@ -86,6 +87,20 @@ test: $(RICH_GO)
 test-nocolor:
 	@echo '>> Running all tests'
 	@GO111MODULE=$(GOMOD) $(GO) test ./... -v
+
+$(GOBADGE):
+	@echo ">> Couldn't find $(GOBADGE); installing ..."
+	@GOPATH=$(DEFAULT_GOPATH) \
+	GOBIN=$(DEFAULT_GOBIN) \
+	GO111MODULE=$(GOMOD) \
+	$(GO) get github.com/jpoles1/gopherbadger
+
+coverage:
+	@go test ./... -coverprofile=cover.out
+	@go tool cover -html=cover.out
+
+update-coverage: $(GOBADGE)
+	@gopherbadger -md="README.md" -png=false -prefix=""
 
 bin:
 	@mkdir ./bin
@@ -174,6 +189,7 @@ tag-delete: VERSION ?= 0.0.0
 tag-delete:
 	@git tag --delete v$(VERSION)
 	@git push --delete origin v$(VERSION)
+
 #############################################################################
 ###   Misc   ################################################################
 #############################################################################
