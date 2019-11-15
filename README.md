@@ -6,6 +6,7 @@
 
 [![Build Status][build-badge]][build]
 [![Go Report Card][report-card-badge]][report-card] 
+![Project Status][project-status]
 [![Tagged Version][tag-badge]][tag]
 
 ## Getting Started
@@ -46,5 +47,6 @@ Time: 3.2932ms
 [build]: https://github.com/bluest-eel/state/actions
 [report-card-badge]: https://goreportcard.com/badge/bluest-eel/state
 [report-card]: https://goreportcard.com/report/bluest-eel/state
+[project-status]: https://img.shields.io/badge/status-planning-violet.svg
 [tag-badge]: https://img.shields.io/github/tag/bluest-eel/state.svg
 [tag]: https://github.com/bluest-eel/state/tags
