@@ -12,9 +12,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.5.0
 	github.com/stretchr/testify v1.4.0
-	golang.org/x/net v0.0.0-20191101175033-0deb6923b6d9 // indirect
-	golang.org/x/sys v0.0.0-20191029155521-f43be2a4598c // indirect
-	golang.org/x/text v0.3.2 // indirect
+	golang.org/x/text v0.3.8 // indirect
 	google.golang.org/genproto v0.0.0-20190905072037-92dd089d5514 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
